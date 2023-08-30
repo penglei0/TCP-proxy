@@ -1,0 +1,60 @@
+// cSpell Settings
+{
+    // Version of the setting file.  Always 0.2
+    "version": "0.2",
+    // language - current active spelling language
+    "language": "en",
+    // words - list of words to be always considered correct
+    "words": [
+        "mkdirp",
+        "tsmerge",
+        "githubusercontent",
+        "streetsidesoftware",
+        "vsmarketplacebadge",
+        "visualstudio",
+        "flowid",
+        "recoder",
+        "precode",
+        "precoder",
+        "precoding",
+        "inact",
+        "ldpc",
+        "LDCP",
+        "hdpc",
+        "ASTRI",
+        "idth",
+        "inac",
+        "inacs",
+        "BATCHID",
+        "tbuf",
+        "tparam",
+        "irow",
+        "jrow",
+        "icol",
+        "jcol",
+        "ccal",
+        "ical",
+        "cpuset",
+        "proto",
+        "thirdparties",
+        "codechecker",
+        "SIMD",
+        "cpplint"
+    ],
+    // flagWords - list of words to be always considered incorrect
+    // This is useful for offensive words and common spelling errors.
+    // For example "hte" should be "the"
+    "flagWords": [
+        "hte"
+    ],
+    // Specify paths/files to ignore.
+    "ignorePaths": [
+        "node_modules", // this will ignore anything the node_modules directory
+        "**/node_modules", // the same for this one
+        "**/node_modules/**", // the same for this one
+        "thirdparties/**", // Doesn't currently work due to how the current working directory is determined.
+        "vscode-extension", //
+        "build**/**",
+        ".git" // Ignore the .git directory
+    ]
+}
