@@ -13,3 +13,8 @@ A TCP proxy means to break the connection between a client and the server. The c
 - **Proxy Server**: The proxy server is used to receive the data from the client and transmit the data to the internet according to its original information of the TCP connections.
 - **Proxy client**: The proxy client is used to transmit/receive the data to/from the proxy server, and the transmission protocol can be any protocol we want.
 
+# Usages
+
+## Build
+
+## Deploy
