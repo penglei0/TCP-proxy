@@ -12,6 +12,16 @@ class RxNotifier {
   virtual bool OnNewMessage(const PacketPtr& packet, const T& info) = 0;
 };
 
+/// @brief The interface to notify the transmission of sent
+/// packet.
+/// @tparam T
+template <typename T>
+class TxNotifier {
+ public:
+  virtual ~TxNotifier() = default;
+  virtual bool HasTransmitted(const T& info) = 0;
+};
+
 /// @brief The interface of rx/tx packets.
 /// @tparam T The information of the operated packets.
 template <typename T>
