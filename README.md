@@ -24,6 +24,7 @@ A TCP proxy means to break the connection between a client and the server. The c
 - **proxy tunnel-u**: The user plane of the proxy tunnel, it is used to transmit the users's data.
 - **proxy tunnel-c**: The control plane of the proxy tunnel, it used to do the control and management of the proxy tunnel, and synchronize some information with the proxy endpoint.
 - **redirected tcp connections**: The tcp connections which are redirected by the proxy frontend.
+- **HDR**: the protocol header of the proxy tunnel; it is a part of TCP Proxy implementation. `proxy tunnel-c` will use the information in the `HDR` to do some simple control and management.
 
 # Usages
 
