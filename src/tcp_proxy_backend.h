@@ -23,107 +23,28 @@
 #include <unordered_map>
 
 #include "base/types.h"
+#include "proxy_tunnel.h"
 #include "tcp/tcp.h"
-
-/// @brief the message format between the proxy client and proxy server.
-/// |ProxyMessageHeader|data|
-struct ProxyMessageHeader {
-  uint32_t src_ip;
-  uint16_t src_port;
-  uint32_t dst_ip;
-  uint16_t dst_port;
-  uint16_t len;
-#if __BYTE_ORDER == __LITTLE_ENDIAN
-  uint16_t type : 2;
-  uint16_t resv : 14;
-#elif __BYTE_ORDER == __BIG_ENDIAN
-  uint16_t resv : 14;
-  uint16_t type : 2;
-#else
-#error \
-    "Unsupported byte order: Either __LITTLE_ENDIAN or " \
-               "__BIG_ENDIAN must be defined"
-#endif  // byte order
-};
-
-/// @brief To handle the dl/up message between proxy client and server.
-class ProxyHandler {
- public:
-  virtual ~ProxyHandler() {}
-  virtual bool HandleDlMessage() = 0;
-  virtual bool HandleUlMessage() = 0;
-  virtual void SetDlChannel(const ChannelPtr& dl_chn) = 0;
-  virtual void SetUlChannel(const ChannelPtr& dl_chn) = 0;
-  virtual int HandleNewConnection(int fd) = 0;
-};
-
-using ProxyHandlerPtr = std::shared_ptr<ProxyHandler>;
-
-class TcpProxyHandlerAdapter : public ProxyHandler {
- public:
-  /// @brief To handle the downlink data receiving.
-  bool HandleDlMessage() override {
-    auto packet = ul_chn_->Read();
-    auto conn_info = Parse(packet);
-    switch (conn_info.type) {
-      case 0:
-        HandleDataMessage(packet, conn_info);
-        break;
-      case 1:
-        HandleControlMessage(packet, conn_info);
-        break;
-      default:
-        break;
-    }
-  }
-  /// @brief To handle the uplink data transmitting.
-  bool HandleUlMessage() override {
-    auto packet = dl_chn_->Read();
-    auto proxy_packet = Build(packet);
-    ul_chn_->Write(proxy_packet);
-  }
-  int HandleNewConnection(int fd) override {
-    // dl_chn_ ??
-    return 0;
-  }
-
- private:
-  auto Parse(const PacketPtr& packet) -> TcpConnection {
-    return TcpConnection();
-  }
-  auto Build(const PacketPtr& packet) -> PacketPtr { return nullptr; }
-  /// @brief To handle the downlink data receiving.
-  /// @param packet
-  /// @param info
-  void HandleDataMessage(const PacketPtr& packet, const TcpConnection& info) {
-    // dl_chn_->Write(packet, conn_info);
-  }
-  /// @brief To control the management of connections.
-  /// @param packet
-  /// @param info
-  void HandleControlMessage(const PacketPtr& packet,
-                            const TcpConnection& info) {
-    // dl_chn_->Write(packet, conn_info);
-  }
-  ChannelPtr dl_chn_ = nullptr;  // downlink channel
-  ChannelPtr ul_chn_ = nullptr;  // uplink channel
-};
-using TcpProxyHandlerAdapterPtr = std::shared_ptr<TcpProxyHandlerAdapter>;
 
 class ProxyBackend {
  public:
   static constexpr int MAX_EVENTS = 1024;
-  ProxyBackend() = default;
-  ~ProxyBackend() {}
+  ProxyBackend() {}
+  virtual ~ProxyBackend() {}
 
   void Start() {
-    server_fd_ = CreateTcpServer(10086);
+    tunnel_ = std::make_shared<ProxyTunnel>();
+    tcp_ = std::make_shared<TcpConnMgr>();
+    // TODO: set the notifier.
+    auto tcp_notifier =
+        std::dynamic_pointer_cast<RxNotifier<TcpConnection>>(tcp_);
+    tunnel_->SetNotifier(tcp_notifier);
+
+    auto tunnel_notifier =
+        std::dynamic_pointer_cast<RxNotifier<TcpConnection>>(tunnel_);
+    tcp_->SetNotifier(tunnel_notifier);
+
     Register(server_fd_);
-  }
-  void SetProxyHandler(const ProxyHandlerPtr& proxy_handler) {
-    proxy_handler_ = proxy_handler;
-    // add carrier to poller?
-    // Register(carrier_->GetFd());
   }
 
  private:
@@ -163,17 +84,18 @@ class ProxyBackend {
       for (int n = 0; n < nfds; ++n) {
         int fd = events_[n].data.fd;
         if (server_fd_ == fd) {
-          int fd = proxy_handler_->HandleNewConnection(fd);
-          if (fd <= 0) {
+          auto tcp_mgr = std::dynamic_pointer_cast<TcpConnMgr>(tcp_);
+          int accept_fd = tcp_mgr->AcceptConnection(fd);
+          if (accept_fd <= 0) {
             std::cout << "AcceptConnection failed" << std::endl;
             continue;
           }
-          Register(fd);
-          continue;
-        } else if (fd == carrier_fd_) {
-          proxy_handler_->HandleDlMessage();
+          Register(accept_fd);
+        } else if (fd == tunnel_fd_) {
+          tunnel_->ReceiveMessage(fd);
         } else {
-          proxy_handler_->HandleUlMessage();
+          // handle tcp receive
+          tcp_->ReceiveMessage(fd);
         }
       }
     }
@@ -183,9 +105,10 @@ class ProxyBackend {
   struct epoll_event events_[MAX_EVENTS];
   bool is_stop_ = false;
   int epoll_fd_ = 0;
-  int server_fd_ = 0;   // TODO renaming
-  int carrier_fd_ = 0;  // TODO renaming
-  ProxyHandlerPtr proxy_handler_ = nullptr;
+  int server_fd_ = 0;  // TODO renaming
+  int tunnel_fd_ = 0;  // TODO renaming
+  RxTxInterfacePtr tunnel_ = nullptr;
+  RxTxInterfacePtr tcp_ = nullptr;
 };
 
 #endif  // SRC_TCP_PROXY_BACKEND_H_
