@@ -33,7 +33,6 @@ struct ProxyMessageHeader {
   uint32_t dst_ip;
   uint16_t dst_port;
   uint16_t len;
-  uint16_t reserved;
 #if __BYTE_ORDER == __LITTLE_ENDIAN
   uint16_t type : 2;
   uint16_t resv : 14;
