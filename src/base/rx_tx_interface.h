@@ -15,12 +15,19 @@ class RxNotifier {
 /// @brief The interface of rx/tx packets.
 /// @tparam T The information of the operated packets.
 template <typename T>
-class RxTxInterface {
+class RxInterface {
  public:
-  virtual ~RxTxInterface() = default;
+  virtual ~RxInterface() = default;
   virtual bool ReceiveMessage(int fd) = 0;
+  virtual void SetRxNotifier(
+      const std::shared_ptr<RxNotifier<T>>& notifier) = 0;
+};
+
+template <typename T>
+class TxInterface {
+ public:
+  virtual ~TxInterface() = default;
   virtual bool SendMessage(const PacketPtr& packet, const T& info) = 0;
-  virtual void SetNotifier(const std::shared_ptr<RxNotifier<T>>& notifier) = 0;
 };
 
 #endif  // SRC_RX_TX_INTERFACE_H_

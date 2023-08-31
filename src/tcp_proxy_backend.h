@@ -33,17 +33,14 @@ class ProxyBackend {
   virtual ~ProxyBackend() {}
 
   void Start() {
-    tunnel_ = std::make_shared<ProxyTunnel>();
-    tcp_ = std::make_shared<TcpConnMgr>();
-    // TODO: set the notifier.
+    tunnel_rx_ = std::make_shared<ProxyTunnel>();
+    tcp_rx_ = std::make_shared<TcpConnMgr>();
     auto tcp_notifier =
-        std::dynamic_pointer_cast<RxNotifier<TcpConnection>>(tcp_);
-    tunnel_->SetNotifier(tcp_notifier);
-
+        std::dynamic_pointer_cast<RxNotifier<TcpConnection>>(tcp_rx_);
     auto tunnel_notifier =
-        std::dynamic_pointer_cast<RxNotifier<TcpConnection>>(tunnel_);
-    tcp_->SetNotifier(tunnel_notifier);
-
+        std::dynamic_pointer_cast<RxNotifier<TcpConnection>>(tunnel_rx_);
+    tunnel_rx_->SetRxNotifier(tcp_notifier);
+    tcp_rx_->SetRxNotifier(tunnel_notifier);
     Register(server_fd_);
   }
 
@@ -84,7 +81,7 @@ class ProxyBackend {
       for (int n = 0; n < nfds; ++n) {
         int fd = events_[n].data.fd;
         if (server_fd_ == fd) {
-          auto tcp_mgr = std::dynamic_pointer_cast<TcpConnMgr>(tcp_);
+          auto tcp_mgr = std::dynamic_pointer_cast<TcpConnMgr>(tcp_rx_);
           int accept_fd = tcp_mgr->AcceptConnection(fd);
           if (accept_fd <= 0) {
             std::cout << "AcceptConnection failed" << std::endl;
@@ -92,10 +89,10 @@ class ProxyBackend {
           }
           Register(accept_fd);
         } else if (fd == tunnel_fd_) {
-          tunnel_->ReceiveMessage(fd);
+          tunnel_rx_->ReceiveMessage(fd);
         } else {
           // handle tcp receive
-          tcp_->ReceiveMessage(fd);
+          tcp_rx_->ReceiveMessage(fd);
         }
       }
     }
@@ -107,8 +104,8 @@ class ProxyBackend {
   int epoll_fd_ = 0;
   int server_fd_ = 0;  // TODO renaming
   int tunnel_fd_ = 0;  // TODO renaming
-  RxTxInterfacePtr tunnel_ = nullptr;
-  RxTxInterfacePtr tcp_ = nullptr;
+  RxInterfacePtr tunnel_rx_ = nullptr;
+  RxInterfacePtr tcp_rx_ = nullptr;
 };
 
 #endif  // SRC_TCP_PROXY_BACKEND_H_

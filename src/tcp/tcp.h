@@ -26,9 +26,11 @@ class ConnectionManager {
 /// channel + serializer + deserializer = proxy tunnel = protocol
 /// channel + ... + channel  = tcp connection manager
 using RxNotifierPtr = std::shared_ptr<RxNotifier<TcpConnection>>;
-using RxTxInterfacePtr = std::shared_ptr<RxTxInterface<TcpConnection>>;
+using RxInterfacePtr = std::shared_ptr<RxInterface<TcpConnection>>;
+using TxInterfacePtr = std::shared_ptr<TxInterface<TcpConnection>>;
 
-class TcpConnMgr : public RxTxInterface<TcpConnection>,
+class TcpConnMgr : public RxInterface<TcpConnection>,
+                   public TxInterface<TcpConnection>,
                    public RxNotifier<TcpConnection>,
                    public ConnectionManager<TcpConnection> {
  public:
@@ -58,7 +60,7 @@ class TcpConnMgr : public RxTxInterface<TcpConnection>,
                     const TcpConnection& info) override {
     return SendMessage(packet, info);
   }
-  void SetNotifier(const RxNotifierPtr& notifier) override {
+  void SetRxNotifier(const RxNotifierPtr& notifier) override {
     notifier_ = notifier;
   }
 

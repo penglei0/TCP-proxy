@@ -59,7 +59,8 @@ class ProxyProtocol : public UDPChannel, public ProtoInterface<TcpConnection> {
 
 using ProxyProtocolPtr = std::shared_ptr<ProxyProtocol>;
 
-class ProxyTunnel : public RxTxInterface<TcpConnection>,
+class ProxyTunnel : public RxInterface<TcpConnection>,
+                    public TxInterface<TcpConnection>,
                     public RxNotifier<TcpConnection> {
  public:
   virtual ~ProxyTunnel() {}
@@ -91,7 +92,7 @@ class ProxyTunnel : public RxTxInterface<TcpConnection>,
                     const TcpConnection& info) override {
     return SendMessage(packet, info);
   }
-  void SetNotifier(const RxNotifierPtr& notifier) override {
+  void SetRxNotifier(const RxNotifierPtr& notifier) override {
     notifier_ = notifier;
   }
 
