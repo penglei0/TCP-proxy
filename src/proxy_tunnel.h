@@ -13,6 +13,7 @@
 
 #include <functional>
 
+#include "base/channel_tcp.h"
 #include "base/channel_udp.h"
 #include "base/proto.h"
 #include "base/rx_tx_interface.h"
@@ -39,83 +40,81 @@ struct ProxyMessageHeader {
 #endif  // byte order
 };
 
-// Decorators
+/// @brief A proxy protocol based on UDP channel and ProtoInterface of
+/// TcpConnection. When we say "proxy protocol", it is a combination of message
+/// formatting and its corresponding transmission protocol.
 class ProxyProtocol : public UDPChannel, public ProtoInterface<TcpConnection> {
  public:
   explicit ProxyProtocol(const UDPChannelPtr& chn) : chn_(chn) {}
+  /// @brief Get the file descriptor of the channel.
+  /// @return
   int GetFd() const override { return chn_->GetFd(); }
+  /// @brief Read the packet from the channel.
+  /// @return The packet read from the channel.
   PacketPtr Read() override { return chn_->Read(); }
+  /// @brief Write the packet to the channel.
+  /// @param packet The packet to be written.
   bool Write(const PacketPtr& packet) override { return chn_->Write(packet); }
-  TcpConnection Parse(const PacketPtr& packet) override {
-    // TODO: parse the packet to TcpConnection.
-  }
-  PacketPtr Build(const PacketPtr& packet) override {
-    // TODO:
-  }
+
+  /// @brief Parse the packet to TcpConnection. Call this when receiving the
+  /// packet from the proxy tunnel.
+  /// @param packet The received packet from the proxy tunnel.
+  /// @return
+  TcpConnection Parse(const PacketPtr& packet) override;
+  /// @brief Build a proxy tunnel format packet from the input packet. Call this
+  /// when sending the packet to the proxy tunnel.
+  /// @param packet The packet to be sent to the proxy tunnel.
+  /// @return The packet in proxy tunnel format.
+  PacketPtr Build(const PacketPtr& packet) override;
 
  private:
+  /// @brief The underlying channel to tx/rx packets to/from the proxy tunnel.
   UDPChannelPtr chn_ = nullptr;
 };
-
 using ProxyProtocolPtr = std::shared_ptr<ProxyProtocol>;
 
+/// @brief The interface of transmitting/receiving packets to/from the tunnel.
 class ProxyTunnel : public RxInterface<TcpConnection>,
                     public TxInterface<TcpConnection>,
                     public RxNotifier<TcpConnection> {
  public:
   virtual ~ProxyTunnel() {}
+  /// @brief receive the packet from the proxy tunnel.
+  /// @param fd The file descriptor of the proxy tunnel channel.
+  /// @return
+  bool ReceiveMessage(int fd) override;
+  /// @brief send the packet to the proxy tunnel.
+  /// @param packet The packet to be sent.
+  /// @param connectionInfo The connection information of the packet.
+  /// @return
   bool SendMessage(const PacketPtr& packet,
-                   const TcpConnection& connectionInfo) override {
-    // connectionInfo
-    if (protocol_) {
-      auto proxy_message = protocol_->Build(packet);
-      protocol_->Write(proxy_message);
-    }
-  }
-  bool ReceiveMessage(int fd) override {
-    auto proxy_message = protocol_->Read();
-    auto conn_info = protocol_->Parse(proxy_message);
-    switch (conn_info.type) {
-      case 0:
-        HandleDataMessage(proxy_message, conn_info);
-        break;
-      case 1:
-        HandleControlMessage(proxy_message, conn_info);
-        break;
-      default:
-        break;
-    }
-  }
+                   const TcpConnection& connectionInfo) override;
   /// @brief Other modules will call this function to notify the reception of
   /// new packets.
+  /// @param packet The received packet.
+  /// @param info The connection information of the packet.
+  /// @return
   bool OnNewMessage(const PacketPtr& packet,
-                    const TcpConnection& info) override {
-    return SendMessage(packet, info);
-  }
-  void SetRxNotifier(const RxNotifierPtr& notifier) override {
-    notifier_ = notifier;
-  }
+                    const TcpConnection& info) override;
+  /// @brief Set the rx notifier. The newly received packets will be notified to
+  /// the rx notifier.
+  void SetRxNotifier(const RxNotifierPtr& notifier) override;
 
  private:
-  /// @brief To handle the downlink data receiving.
+  /// @brief To handle data message.
   /// @param packet
   /// @param info
-  void HandleDataMessage(const PacketPtr& packet, const TcpConnection& info) {
-    // data to tcp manager.
-    notifier_->OnNewMessage(packet, info);
-  }
-  /// @brief To control the management of connections.
+  void HandleDataMessage(const PacketPtr& packet, const TcpConnection& info);
+  /// @brief To handle control message.
   /// @param packet
   /// @param info
-  void HandleControlMessage(const PacketPtr& packet,
-                            const TcpConnection& info) {
-    notifier_->OnNewMessage(packet, info);
-  }
+  void HandleControlMessage(const PacketPtr& packet, const TcpConnection& info);
 
+  /// The proxy protocol instance.
   ProxyProtocolPtr protocol_ = nullptr;
-  RxNotifierPtr notifier_ = nullptr;  // to notify the reception of new packets.
+  // to notify the reception of new packets.
+  RxNotifierPtr notifier_ = nullptr;
 };
-
 using ProxyTunnelPtr = std::shared_ptr<ProxyTunnel>;
 
 #endif  // SRC_PROXY_TUNNEL_H_

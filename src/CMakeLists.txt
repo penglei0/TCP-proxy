@@ -1,10 +1,12 @@
 aux_source_directory(. DIR_SOURCES)
-#add_subdirectory(tun)
-#add_subdirectory(tcp)
-#add_subdirectory(poll)
-add_subdirectory(base)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
+add_subdirectory(tcp)
 add_executable(
     tcp_proxy
-    main.cc
+    ${DIR_SOURCES}
 )
-#target_link_libraries(main)
+target_link_libraries(tcp_proxy
+    tcp_module
+    Threads::Threads)

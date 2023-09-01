@@ -8,10 +8,9 @@
 #include "base/channel_tcp.h"
 #include "base/rx_tx_interface.h"
 #include "base/types.h"
-#include "proxy_tunnel.h"
 
-int CreateTcpServer(int port) { return 0; }
-
+/// @brief The manager of the `T` connections.
+/// @tparam T
 template <typename T>
 class ConnectionManager {
  public:
@@ -21,53 +20,55 @@ class ConnectionManager {
   virtual auto GetConnection(uint64_t key) -> T = 0;
 };
 
-// TODO merge the implementation of TcpConnMgr and ProxyTunnel, they are the
-// same things.
-/// channel + serializer + deserializer = proxy tunnel = protocol
-/// channel + ... + channel  = tcp connection manager
+/// @brief rx/tx interface.
 using RxNotifierPtr = std::shared_ptr<RxNotifier<TcpConnection>>;
 using RxInterfacePtr = std::shared_ptr<RxInterface<TcpConnection>>;
 using TxInterfacePtr = std::shared_ptr<TxInterface<TcpConnection>>;
 
+/// @brief The manager of the TCP connections, with interface of rx/tx/accept.
 class TcpConnMgr : public RxInterface<TcpConnection>,
                    public TxInterface<TcpConnection>,
                    public RxNotifier<TcpConnection>,
                    public ConnectionManager<TcpConnection> {
  public:
-  TcpConnMgr() { server_fd_ = CreateTcpServer(10086); }
-  ~TcpConnMgr() {}
-  int AcceptConnection(int fd) override { return 0; }
-  bool CloseConnection(const TcpConnection& info) override { return false; }
-  auto GetConnection(uint64_t key) -> TcpConnection override {
-    return TcpConnection();
-  }
-  bool ReceiveMessage(int fd) override {
-    // TODO find the tcp channel by fd.
-    TCPChannelPtr tcp = nullptr;
-    auto packet = tcp->Read();
-    if (packet) {
-      const auto& conn = tcp->ConnectionInfo();
-      notifier_->OnNewMessage(packet, conn);
-    }
-  }
+  TcpConnMgr();
+  ~TcpConnMgr();
+  /// @brief Accept a new connection from the `fd`.
+  /// @param fd
+  /// @return
+  int AcceptConnection(int fd) override;
+  /// @brief Close the connection with the `info`.
+  /// @param info The information of the connection.
+  /// @return
+  bool CloseConnection(const TcpConnection& info) override;
+  /// @brief Get the connection with the `key`.
+  /// @param key
+  /// @return
+  auto GetConnection(uint64_t key) -> TcpConnection override;
+  /// @brief Receive the packet from the `fd`.
+  /// @param fd A file descriptor of the TCP connection.
+  /// @return
+  bool ReceiveMessage(int fd) override;
+  /// @brief Send the packet to its associated connection.
+  /// @param packet The packet to be sent.
+  /// @param connectionInfo The connection information of the packet.
+  /// @return
   bool SendMessage(const PacketPtr& packet,
-                   const TcpConnection& connectionInfo) override {
-    return false;
-  }
+                   const TcpConnection& connectionInfo) override;
   /// @brief Other modules will call this function to notify the reception of
   /// new packets.
   bool OnNewMessage(const PacketPtr& packet,
-                    const TcpConnection& info) override {
-    return SendMessage(packet, info);
-  }
-  void SetRxNotifier(const RxNotifierPtr& notifier) override {
-    notifier_ = notifier;
-  }
+                    const TcpConnection& info) override;
+  /// @brief Set the rx notifier.
+  /// @param notifier
+  void SetRxNotifier(const RxNotifierPtr& notifier) override;
 
  private:
+  // the file descriptor of the TCP server.
   int server_fd_ = 0;
+  // to notify the reception of new packets.
+  RxNotifierPtr notifier_ = nullptr;
   std::unordered_map<uint64_t, TCPChannel> connections_;
-  RxNotifierPtr notifier_ = nullptr;  // to notify the reception of new packets.
 };
 using TcpConnMgrPtr = std::shared_ptr<TcpConnMgr>;
 
