@@ -53,7 +53,7 @@ class ProxyProtocol : public UDPChannel, public ProtoInterface<TcpConnection> {
   int GetFd() const override { return chn_->GetFd(); }
   /// @brief Read the packet from the channel.
   /// @return The packet read from the channel.
-  PacketPtr Read() override { return chn_->Read(); }
+  PacketPtr ReadUntil() override { return chn_->ReadUntil(); }
   /// @brief Write the packet to the channel.
   /// @param packet The packet to be written.
   bool Write(const PacketPtr& packet) override { return chn_->Write(packet); }

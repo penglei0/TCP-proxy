@@ -14,7 +14,7 @@ bool TcpConnMgr::ReceiveMessage(int fd) {
   // TODO find the tcp channel by fd.
   /*
   TCPChannelPtr tcp;
-  auto packet = tcp->Read();
+  auto packet = tcp->ReadUntil();
   if (packet) {
     const auto& conn = tcp->ConnectionInfo();
     notifier_->OnNewMessage(packet, conn);

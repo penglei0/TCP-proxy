@@ -20,7 +20,7 @@ bool ProxyTunnel::SendMessage(const PacketPtr& packet,
 }
 
 bool ProxyTunnel::ReceiveMessage(int fd) {
-  auto proxy_message = protocol_->Read();
+  auto proxy_message = protocol_->ReadUntil();
   auto conn_info = protocol_->Parse(proxy_message);
   switch (conn_info.type) {
     case 0:

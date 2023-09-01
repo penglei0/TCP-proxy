@@ -18,7 +18,7 @@ class TunDevice {
 
   bool Open() { return false; }
   bool Close() { return false; }
-  PacketPtr Read() { return nullptr; }
+  PacketPtr ReadUntil() { return nullptr; }
   bool Write(const PacketPtr& packet) { return false; }
   int GetFd() const { return fd_; }
 

@@ -18,7 +18,7 @@ void ProxyFrontend::Start() {
 void ProxyFrontend::UlThread() {
   while (is_stop_) {
     // read from rx_tun_
-    auto packet = rx_tun_->Read();
+    auto packet = rx_tun_->ReadUntil();
     // TCP hijack
     HijackTcpPacket(packet);
     // write to tx_tun_
@@ -30,7 +30,7 @@ void ProxyFrontend::UlThread() {
 void ProxyFrontend::DlThread() {
   while (is_stop_) {
     // read from rx_tun_
-    auto packet = tx_tun_->Read();
+    auto packet = tx_tun_->ReadUntil();
     // TCP restore
     RestoreTcpPacket(packet);
     // write to tx_tun_
