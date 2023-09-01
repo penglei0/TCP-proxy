@@ -1,6 +1,9 @@
 #ifndef SRC_BASE_CHANNEL_TCP_H_
 #define SRC_BASE_CHANNEL_TCP_H_
 
+#include <unistd.h>
+
+#include <iostream>
 #include <string>
 
 #include "base/channel.h"
@@ -31,8 +34,27 @@ class TCPChannel : public Channel {
   TCPChannel& operator=(const TCPChannel&) = delete;
   TCPChannel(const TCPChannel&&) = delete;
   TCPChannel& operator=(const TCPChannel&&) = delete;
+  // rename to ReadUntil
+  PacketPtr Read() override {
+    int received = 0;
+    octet buf[max_packet_size];
+    while (true) {
+      int ret = read(fd_, buf + received, max_packet_size - received);
+      if (ret < 0 && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) {
+        break;
+      }
+      received += ret;
+    }
+    // TODO: reduce copy and memory allocation
+    auto packet = std::make_shared<Packet>();
+    if (received > packet->Capacity()) {
+      std::cerr << "packet size is too large: " << received << std::endl;
+      return nullptr;
+    }
+    std::copy(buf, buf + received, std::back_inserter(packet->Data()));
+    return packet;
+  }
 
-  PacketPtr Read() override { return nullptr; }
   bool Write(const PacketPtr& packet) override { return true; }
   int GetFd() const override { return fd_; }
   const TcpConnection& ConnectionInfo() const { return conn_info_; }
