@@ -46,7 +46,7 @@ class TCPChannel : public Channel {
     }
     return true;
   }
-  PacketPtr ReadUntil() override {
+  void ReadUntil(const PacketCallback& packet_callback) override {
     int received = 0;
     octet buf[max_packet_size];
     while (true) {
@@ -60,10 +60,10 @@ class TCPChannel : public Channel {
     auto packet = std::make_shared<Packet>();
     if (received > packet->Capacity()) {
       std::cerr << "packet size is too large: " << received << std::endl;
-      return nullptr;
+      return;
     }
     std::copy(buf, buf + received, std::back_inserter(packet->Data()));
-    return packet;
+    packet_callback(packet);
   }
   PacketPtr ReadOnce() override {
     int received = 0;

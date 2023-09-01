@@ -20,18 +20,20 @@ bool ProxyTunnel::SendMessage(const PacketPtr& packet,
 }
 
 bool ProxyTunnel::ReceiveMessage(int fd) {
-  auto proxy_message = protocol_->ReadUntil();
-  auto conn_info = protocol_->Parse(proxy_message);
-  switch (conn_info.type) {
-    case 0:
-      HandleDataMessage(proxy_message, conn_info);
-      break;
-    case 1:
-      HandleControlMessage(proxy_message, conn_info);
-      break;
-    default:
-      break;
-  }
+  protocol_->ReadUntil([this](const PacketPtr& packet) -> bool {
+    auto conn_info = protocol_->Parse(packet);
+    switch (conn_info.type) {
+      case 0:
+        HandleDataMessage(packet, conn_info);
+        break;
+      case 1:
+        HandleControlMessage(packet, conn_info);
+        break;
+      default:
+        break;
+    }
+    return true;
+  });
   return false;
 }
 

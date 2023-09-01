@@ -36,7 +36,7 @@ class UDPChannel : public Channel {
     return true;
   }
   // FIXME:ReadUntil in `UDP` mode should return multiple packets.
-  PacketPtr ReadUntil() override { return nullptr; }
+  void ReadUntil(const PacketCallback& packet_callback) override {}
   PacketPtr ReadOnce() override { return nullptr; }
   bool Write(const PacketPtr& packet) override { return true; }
   int GetFd() const override { return fd_; }
