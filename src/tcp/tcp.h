@@ -6,11 +6,12 @@
 
 #include "base/channel.h"
 #include "base/channel_tcp.h"
+#include "base/rx_tx_entity.h"
 #include "base/rx_tx_interface.h"
 #include "base/types.h"
 
 /// @brief The manager of the `T` connections.
-/// @tparam T
+/// @param T
 template <typename T>
 class ConnectionManager {
  public:
@@ -22,13 +23,11 @@ class ConnectionManager {
 
 /// @brief rx/tx interface.
 using RxNotifierPtr = std::shared_ptr<RxNotifier<TcpConnection>>;
-using RxInterfacePtr = std::shared_ptr<RxInterface<TcpConnection>>;
-using TxInterfacePtr = std::shared_ptr<TxInterface<TcpConnection>>;
+using RxTxEntityTcpPtr = std::shared_ptr<RxTxEntity<TcpConnection>>;
 
+// FIXME: inheriting multiple classes that aren't pure virtual is discouraged
 /// @brief The manager of the TCP connections, with interface of rx/tx/accept.
-class TcpConnMgr : public RxInterface<TcpConnection>,
-                   public TxInterface<TcpConnection>,
-                   public RxNotifier<TcpConnection>,
+class TcpConnMgr : public RxTxEntity<TcpConnection>,
                    public ConnectionManager<TcpConnection> {
  public:
   TcpConnMgr();
@@ -75,6 +74,7 @@ class TcpConnMgr : public RxInterface<TcpConnection>,
   RxNotifierPtr notifier_ = nullptr;
   std::unordered_map<uint64_t, TCPChannel> connections_;
 };
+
 using TcpConnMgrPtr = std::shared_ptr<TcpConnMgr>;
 
 #endif  // SRC_TCP_TCP_H_

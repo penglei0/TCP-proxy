@@ -37,8 +37,6 @@ bool ProxyTunnel::ReceiveMessage(int fd) {
   return false;
 }
 
-/// @brief Other modules will call this function to notify the reception of
-/// new packets.
 bool ProxyTunnel::OnNewMessage(const PacketPtr& packet,
                                const TcpConnection& info) {
   return SendMessage(packet, info);
@@ -47,17 +45,13 @@ bool ProxyTunnel::OnNewMessage(const PacketPtr& packet,
 void ProxyTunnel::SetRxNotifier(const RxNotifierPtr& notifier) {
   notifier_ = notifier;
 }
-/// @brief To handle the downlink data receiving.
-/// @param packet
-/// @param info
+
 void ProxyTunnel::HandleDataMessage(const PacketPtr& packet,
                                     const TcpConnection& info) {
   // data to tcp manager.
   notifier_->OnNewMessage(packet, info);
 }
-/// @brief To control the management of connections.
-/// @param packet
-/// @param info
+
 void ProxyTunnel::HandleControlMessage(const PacketPtr& packet,
                                        const TcpConnection& info) {
   notifier_->OnNewMessage(packet, info);

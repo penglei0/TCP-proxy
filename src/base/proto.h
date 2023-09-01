@@ -5,7 +5,7 @@
 #include "types.h"
 
 /// @brief The interface of proto.
-/// @tparam T The information of the proto header.
+/// @param T The information of the proto header.
 template <typename T>
 class ProtoInterface {
  public:

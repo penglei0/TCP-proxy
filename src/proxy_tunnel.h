@@ -78,9 +78,7 @@ class ProxyProtocol : public UDPChannel, public ProtoInterface<TcpConnection> {
 using ProxyProtocolPtr = std::shared_ptr<ProxyProtocol>;
 
 /// @brief The interface of transmitting/receiving packets to/from the tunnel.
-class ProxyTunnel : public RxInterface<TcpConnection>,
-                    public TxInterface<TcpConnection>,
-                    public RxNotifier<TcpConnection> {
+class ProxyTunnel : public RxTxEntity<TcpConnection> {
  public:
   ProxyTunnel() = default;
   virtual ~ProxyTunnel() {}

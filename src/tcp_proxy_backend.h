@@ -58,9 +58,9 @@ class ProxyBackend {
   int server_fd_ = 0;  // TODO renaming
   int tunnel_fd_ = 0;  // TODO renaming
   // The rx interface to receive the tcp payload from the proxy tunnel.
-  RxInterfacePtr tunnel_rx_ = nullptr;
+  RxTxEntityTcpPtr tunnel_entity_ = nullptr;
   // The rx interface to receive the tcp payload from the remote proxy backend.
-  RxInterfacePtr tcp_rx_ = nullptr;
+  RxTxEntityTcpPtr tcp_entity_ = nullptr;
 };
 
 #endif  // SRC_TCP_PROXY_BACKEND_H_

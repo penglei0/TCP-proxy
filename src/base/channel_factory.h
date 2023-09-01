@@ -3,8 +3,9 @@
 
 #include <string>
 
-#include "base/channel.h"
-#include "base/channel_udp.h"
+#include "channel.h"
+#include "channel_tcp.h"
+#include "channel_udp.h"
 
 class TunnelChannelFactory {
  public:

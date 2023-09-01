@@ -1,10 +1,13 @@
-#ifndef SRC_RX_TX_INTERFACE_H_
-#define SRC_RX_TX_INTERFACE_H_
+#ifndef SRC_BASE_RX_TX_INTERFACE_H_
+#define SRC_BASE_RX_TX_INTERFACE_H_
+#include <functional>
 
 #include "base/packet.h"
+
+using RegisterFunc = std::function<bool(int)>;
 /// @brief The interface of other modules to notify the reception of new
 /// packets.
-/// @tparam T
+/// @param T
 template <typename T>
 class RxNotifier {
  public:
@@ -14,7 +17,7 @@ class RxNotifier {
 
 /// @brief The interface to notify the transmission of sent
 /// packet.
-/// @tparam T
+/// @param T
 template <typename T>
 class TxNotifier {
  public:
@@ -22,8 +25,16 @@ class TxNotifier {
   virtual bool HasTransmitted(const T& info) = 0;
 };
 
+/// @brief interface of handling the register/unregister
+class PollerInterface {
+ public:
+  virtual ~PollerInterface() = default;
+  virtual bool RegisterToPoller(RegisterFunc&& register_func) = 0;
+  virtual bool UnregisterFromPoller(RegisterFunc&& unregister_func) = 0;
+};
+
 /// @brief The interface of rx/tx packets.
-/// @tparam T The information of the operated packets.
+/// @param T The information of the operated packets.
 template <typename T>
 class RxInterface {
  public:
@@ -40,4 +51,4 @@ class TxInterface {
   virtual bool SendMessage(const PacketPtr& packet, const T& info) = 0;
 };
 
-#endif  // SRC_RX_TX_INTERFACE_H_
+#endif  // SRC_BASE_RX_TX_INTERFACE_H_
