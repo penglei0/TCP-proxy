@@ -24,6 +24,10 @@ class ProxyFrontend {
  public:
   ProxyFrontend() = default;
   virtual ~ProxyFrontend();
+  ProxyFrontend(const ProxyFrontend&) = delete;
+  ProxyFrontend& operator=(const ProxyFrontend&) = delete;
+  ProxyFrontend(const ProxyFrontend&&) = delete;
+  ProxyFrontend& operator=(const ProxyFrontend&&) = delete;
   /// @brief Start the frontend.
   void Start();
   /// @brief Ul: uplink (to the proxy backend)

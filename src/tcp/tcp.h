@@ -33,6 +33,11 @@ class TcpConnMgr : public RxInterface<TcpConnection>,
  public:
   TcpConnMgr();
   ~TcpConnMgr();
+  // disable copy and move
+  TcpConnMgr(const TcpConnMgr&) = delete;
+  TcpConnMgr& operator=(const TcpConnMgr&) = delete;
+  TcpConnMgr(const TcpConnMgr&&) = delete;
+  TcpConnMgr& operator=(const TcpConnMgr&&) = delete;
   /// @brief Accept a new connection from the `fd`.
   /// @param fd
   /// @return

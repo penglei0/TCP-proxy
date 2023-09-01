@@ -11,8 +11,6 @@
 #ifndef SRC_PROXY_TUNNEL_H_
 #define SRC_PROXY_TUNNEL_H_
 
-#include <functional>
-
 #include "base/channel_tcp.h"
 #include "base/channel_udp.h"
 #include "base/proto.h"
@@ -46,6 +44,10 @@ struct ProxyMessageHeader {
 class ProxyProtocol : public UDPChannel, public ProtoInterface<TcpConnection> {
  public:
   explicit ProxyProtocol(const UDPChannelPtr& chn) : chn_(chn) {}
+  ProxyProtocol(const ProxyProtocol&) = delete;
+  ProxyProtocol& operator=(const ProxyProtocol&) = delete;
+  ProxyProtocol(const ProxyProtocol&&) = delete;
+  ProxyProtocol& operator=(const ProxyProtocol&&) = delete;
   /// @brief Get the file descriptor of the channel.
   /// @return
   int GetFd() const override { return chn_->GetFd(); }
@@ -78,7 +80,13 @@ class ProxyTunnel : public RxInterface<TcpConnection>,
                     public TxInterface<TcpConnection>,
                     public RxNotifier<TcpConnection> {
  public:
+  ProxyTunnel() = default;
   virtual ~ProxyTunnel() {}
+  // disable copy and move
+  ProxyTunnel(const ProxyTunnel&) = delete;
+  ProxyTunnel& operator=(const ProxyTunnel&) = delete;
+  ProxyTunnel(const ProxyTunnel&&) = delete;
+  ProxyTunnel& operator=(const ProxyTunnel&&) = delete;
   /// @brief receive the packet from the proxy tunnel.
   /// @param fd The file descriptor of the proxy tunnel channel.
   /// @return

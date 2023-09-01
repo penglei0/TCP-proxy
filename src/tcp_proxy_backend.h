@@ -32,6 +32,10 @@ class ProxyBackend {
  public:
   ProxyBackend() = default;
   virtual ~ProxyBackend() = default;
+  ProxyBackend(const ProxyBackend&) = delete;
+  ProxyBackend& operator=(const ProxyBackend&) = delete;
+  ProxyBackend(const ProxyBackend&&) = delete;
+  ProxyBackend& operator=(const ProxyBackend&&) = delete;
   /// @brief Start the backend.
   void Start();
 
