@@ -39,7 +39,7 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS
 )
 # uncomment this line if you want to use the source code of googletest without downloading it.
-set(FETCHCONTENT_SOURCE_DIR_GOOGLETEST ${CMAKE_BINARY_DIR}/_deps/googletest-src)
+# set(FETCHCONTENT_SOURCE_DIR_GOOGLETEST ${CMAKE_BINARY_DIR}/_deps/googletest-src)
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
