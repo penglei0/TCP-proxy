@@ -57,7 +57,6 @@ void ProxyBackend::EpollThread() {
           std::cout << "AcceptConnection failed" << std::endl;
           continue;
         }
-        Register(accept_fd);
       } else if (fd == tunnel_fd_) {
         tunnel_entity_->ReceiveMessage(fd);
       } else {
