@@ -38,3 +38,13 @@ A TCP proxy means to break the connection between a client and the server. The c
 ## Build
 
 ## Deploy
+
+## Roadmap
+
+features in coming:
+
+- 1. to support the following transmission protocol:
+  - TCP
+  - KCP
+- 2. to support data encryption between backends.
+- 3. load ballance at backend server.
