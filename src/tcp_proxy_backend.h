@@ -22,8 +22,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "base/rx_tx_entity.h"
 #include "base/types.h"
-#include "tcp/tcp.h"
 
 /// @brief The backend of TCP proxy module is used to receive the TCP payload
 /// from the frontend, and transmit the TCP payload to the remote proxy

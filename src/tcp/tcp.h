@@ -21,10 +21,6 @@ class ConnectionManager {
   virtual auto GetConnection(uint64_t key) -> T = 0;
 };
 
-/// @brief rx/tx interface.
-using RxNotifierPtr = std::shared_ptr<RxNotifier<TcpConnection>>;
-using RxTxEntityTcpPtr = std::shared_ptr<RxTxEntity<TcpConnection>>;
-
 // FIXME: inheriting multiple classes that aren't pure virtual is discouraged
 /// @brief The manager of the TCP connections, with interface of rx/tx/accept.
 class TcpConnMgr : public RxTxEntity<TcpConnection>,

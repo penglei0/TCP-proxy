@@ -8,18 +8,7 @@
 #include <iostream>
 #include <string>
 
-#include "base/channel.h"
-
-/// @brief the message format between the proxy client and proxy server.
-class TcpConnection {
- public:
-  uint32_t src_ip;
-  uint16_t src_port;
-  uint32_t dst_ip;
-  uint16_t dst_port;
-  int fd;
-  int type;
-};
+#include "channel.h"
 
 class TcpChannelCfg {
  public:

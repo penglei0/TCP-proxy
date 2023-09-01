@@ -14,8 +14,7 @@
 #include "base/channel_tcp.h"
 #include "base/channel_udp.h"
 #include "base/proto.h"
-#include "base/rx_tx_interface.h"
-#include "tcp/tcp.h"
+#include "base/rx_tx_entity.h"
 
 /// @brief the message format between the proxy client and proxy server.
 /// | ProxyMessageHeader | data |

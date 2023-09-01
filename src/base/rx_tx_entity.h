@@ -2,6 +2,7 @@
 #define SRC_BASE_RX_TX_ENTITY_H_
 
 #include "base/rx_tx_interface.h"
+#include "types.h"
 
 template <typename T>
 class RxTxEntity : public RxInterface<T>,
@@ -23,5 +24,9 @@ class RxTxEntity : public RxInterface<T>,
   RegisterFunc register_func_;
   RegisterFunc unregister_func_;
 };
+
+/// @brief rx/tx interface.
+using RxNotifierPtr = std::shared_ptr<RxNotifier<TcpConnection>>;
+using RxTxEntityTcpPtr = std::shared_ptr<RxTxEntity<TcpConnection>>;
 
 #endif  // SRC_BASE_RX_TX_ENTITY_H_

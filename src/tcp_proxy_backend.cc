@@ -1,6 +1,7 @@
 #include "tcp_proxy_backend.h"
 
 #include "proxy_tunnel.h"
+#include "tcp/tcp.h"
 
 void ProxyBackend::Start() {
   tunnel_entity_ = std::make_shared<ProxyTunnel>();
